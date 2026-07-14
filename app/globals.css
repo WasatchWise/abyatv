@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink text-paper font-sans antialiased;
+  background-image: var(--tw-bg-vault, none);
+}
+
+/* Case-file noir helpers ---------------------------------------------------- */
+
+/* Amber clearance stamp — angled, outlined, used for CTAs and section marks. */
+.stamp {
+  @apply inline-flex items-center gap-2 border-2 border-amber text-amber font-mono uppercase tracking-[0.2em] text-xs px-3 py-1;
+}
+
+/* Dossier surface — the card material everything sits on. */
+.dossier {
+  @apply bg-ink-800/80 border border-ink-500/60 rounded-md backdrop-blur-sm;
+}
+
+/* Redaction bar — for THE BROKER and gated marks. */
+.redacted {
+  @apply bg-redact/90 text-ink font-mono uppercase tracking-widest;
+}
+
+/* Mono label */
+.label {
+  @apply font-mono uppercase tracking-[0.25em] text-[0.7rem];
+}
+
+/* Grain overlay for cinematic texture. */
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Custom scrollbar for the noir feel. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0c1120;
+}
+::-webkit-scrollbar-thumb {
+  background: #22354f;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a7f8c;
+}

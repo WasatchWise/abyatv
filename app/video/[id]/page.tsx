@@ -16,6 +16,7 @@ import {
 } from '@/lib/videos';
 import { VideoCard } from '@/components/VideoCard';
 import { TrustBadge } from '@/components/TrustBadge';
+import { YouTubeEmbed } from '@/components/YouTubeEmbed';
 
 // Static-render every review page for speed; re-check the vetted set hourly.
 export const revalidate = 3600;
@@ -121,13 +122,21 @@ export default async function VideoReviewPage({
             </span>
           </div>
 
-          {/* The verdict, up top — thumbnail + brief. */}
+          {/* The verdict, up top — watch it here + the brief. */}
           <div className="dossier mt-6 overflow-hidden">
-            {video.thumbnail_url && (
-              <div className="relative aspect-video w-full overflow-hidden bg-ink">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={video.thumbnail_url} alt="" className="h-full w-full object-cover" />
-              </div>
+            {video.platform === 'youtube' && video.platform_video_id ? (
+              <YouTubeEmbed
+                videoId={video.platform_video_id}
+                title={video.title}
+                poster={video.thumbnail_url}
+              />
+            ) : (
+              video.thumbnail_url && (
+                <div className="relative aspect-video w-full overflow-hidden bg-ink">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={video.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                </div>
+              )
             )}
             <div className="p-5">
               <div className="flex items-center gap-2">
@@ -141,13 +150,13 @@ export default async function VideoReviewPage({
                 href={video.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-sm bg-amber px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-ink transition hover:bg-amber-bright"
+                className="mt-5 inline-flex items-center gap-2 rounded-sm border border-ink-500 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-paper/70 transition hover:border-amber hover:text-amber"
               >
-                Watch on {video.platform === 'youtube' ? 'YouTube' : video.platform}
+                Open on {video.platform === 'youtube' ? 'YouTube' : video.platform}
                 <ExternalLink size={14} />
               </a>
               <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-widest text-paper/35">
-                Opens on the original platform · abya.tv never hosts the video
+                Streams from {video.platform === 'youtube' ? 'YouTube' : video.platform} · abya.tv never hosts the video
               </p>
             </div>
           </div>

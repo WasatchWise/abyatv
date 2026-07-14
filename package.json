@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx scripts/seed-videos.ts",
+    "lookup-channels": "tsx scripts/lookup-channels.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -22,10 +24,12 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.23",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.1.11",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.13",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

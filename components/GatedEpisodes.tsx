@@ -1,20 +1,24 @@
 import { GATED_EPISODES } from '@/lib/tracks';
-import { ArrowUpRight, Fingerprint } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 const AGENCY_URL = process.env.NEXT_PUBLIC_AGENCY_URL ?? 'https://askbeforeyouapp.com';
 
 /**
  * Gated episodes render as CARDS, NOT players. Every click navigates to the
- * Agency apex (never a district subdomain) — that click is the handoff to
- * where membership and identity live. abya.tv shows title + CTA and sends
- * the visitor off-site. Nothing plays here.
+ * Agency apex (never a district subdomain). That click is the handoff to where
+ * membership and identity live. abya.tv shows title + CTA and sends the visitor
+ * off-site. Nothing plays here.
+ *
+ * Villain art is canonical League of Gaps (THE TRACKER, THE BROKER), rendered
+ * as a darkened silhouette behind a black redaction bar with the BreachCorp
+ * acid-green corruption glow. Canon: no invented rogues, silhouette only.
  */
 export function GatedEpisodes() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6" id="episodes">
       <div className="mb-10">
-        <span className="label text-redact">Classified // Agency Clearance</span>
-        <h2 className="mt-2 font-mono text-2xl font-bold tracking-tight text-paper sm:text-3xl">
+        <span className="stamp border-acid text-acid">Classified // Agency Clearance</span>
+        <h2 className="mt-4 font-mono text-2xl font-bold tracking-tight text-paper sm:text-3xl">
           The declassified case files
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-paper/60">
@@ -28,13 +32,22 @@ export function GatedEpisodes() {
           <a
             key={ep.code}
             href={AGENCY_URL}
-            className="dossier group relative flex items-center gap-5 overflow-hidden p-5 transition hover:border-redact/60"
+            className="dossier group relative flex items-center gap-5 overflow-hidden p-5 transition hover:border-acid/50"
           >
-            {/* Redacted "poster" — a silhouette, never a player. */}
-            <div className="relative flex h-24 w-40 shrink-0 items-center justify-center overflow-hidden rounded bg-ink">
-              <div className="absolute inset-0 bg-[radial-gradient(80%_120%_at_50%_0%,#22354f_0%,#080b14_100%)]" />
-              <Fingerprint className="relative text-redact/70" size={32} />
-              <span className="redacted absolute bottom-1 left-1 px-1 text-[0.55rem]">
+            {/* Silhouette poster — the rogue in shadow, never a player. */}
+            <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded bg-ink">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={ep.art}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover opacity-40 grayscale-[0.3] transition duration-500 group-hover:opacity-60"
+              />
+              {/* Acid-green corruption wash + navy vignette. */}
+              <div className="absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(124,252,77,0.12)_0%,rgba(4,16,28,0.85)_70%)]" />
+              {/* Black redaction bar. */}
+              <div className="absolute left-0 top-1/2 h-4 w-full -translate-y-1/2 bg-redact/85" />
+              <span className="absolute bottom-1 left-1 bg-acid px-1 font-mono text-[0.55rem] font-bold uppercase tracking-widest text-ink">
                 Classified
               </span>
             </div>

@@ -41,7 +41,19 @@ links out to it; it never collects on its behalf.
 Supabase project **ABYA_TV** (`pkzexxqshawljljdyobf`), read-only, anon key.
 Three tables, all RLS-on, public-read: `abya_channels`, `abya_videos`,
 `abya_vetting_log`. The product is `abya_videos.parent_abstract` — the "here's
-what's in this video" summary shown on every directory card.
+what's in this video" summary shown on every directory card. The canonical
+schema lives at `supabase/migrations/001_initial_schema.sql` (v2, 2026-03-06),
+salvaged verbatim from the prior local-only app; it matches the sealed DB.
+
+### The directory data engine (offline ops, not part of the app)
+
+`scripts/seed-videos.ts` is the vetting pipeline: it pulls videos from a curated
+channel list, scores each on the 10-dimension rubric with Claude Haiku, writes
+the plain-language `parent_abstract`, and upserts approved rows. It is run by
+hand (`pnpm seed`) with the ops env (`.env.ops.example`) and is **never imported
+by the Next.js app**. It uses the service-role key because it writes *content*
+(videos/channels — zero PII); the deployed app has neither the key nor a write
+path. `scripts/lookup-channels.ts` resolves channel IDs by name.
 
 ## Stack
 
@@ -84,8 +96,30 @@ service-role key.**
 
 ## Canon guardrails baked in
 
-- The 10 tracks use their real names. Track 0 (DPA 101) is the free on-ramp.
+- The 10 tracks use their real names (from `agent-ferpa-master-script-v2.md`).
+  Track 0 (DPA 101) is the free on-ramp.
 - Only 3 pieces are produced (Hub Intro, Ep-F1, Ep-F2). No inflated counts.
-- THE FOG is not a character. The only rogue referenced is THE BROKER
-  (silhouette only). No invented lore.
+- THE FOG is not a character. The only rogues shown are canonical League of
+  Gaps art from the master-script rogue-visuals — THE TRACKER (Ep-F1) and THE
+  BROKER (Ep-F2), silhouette only. No invented lore.
+- Palette is locked to `agent-ferpa-visual-bible.md`: navy `#003D6B`, mid
+  `#005696`, cyan `#9CEAFF`, amber `#FFB347`, BreachCorp acid green `#7CFC4D`.
 - Pricing lives on the Agency; it is not sold here.
+
+## Salvaged vs. rebuilt
+
+Salvaged from the prior local-only `abya-tv/` app (never pushed):
+- `supabase/migrations/001_initial_schema.sql` — canonical v2 schema, verbatim.
+- `scripts/seed-videos.ts` — the vetting pipeline. Scoring machinery kept as-is;
+  the kid-safe / "Depth Zone" copy was reframed to the review-directory voice.
+- `scripts/lookup-channels.ts` — channel-ID lookup helper, verbatim.
+- `public/villains/*.webp` — the 11 canonical League of Gaps art files.
+
+Rebuilt new (the old ocean / "Depth Zones" / kid-safe front-end was discarded):
+- All of `app/`, `components/`, `lib/` — the case-file-noir front-end.
+- `lib/supabase.ts` — a cookieless, anon-only, read-only client (replaces the
+  salvaged `@supabase/ssr` cookie client, which is unnecessary with no auth).
+
+Never ported (by design): `joinWaitlist` / the `waitlist` table, and every
+ocean/Depth-Zone/kid-safe component. Porting `joinWaitlist` would rebuild the
+PII wall that was torn down.

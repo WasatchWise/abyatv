@@ -1,47 +1,60 @@
 import type { Config } from 'tailwindcss';
 
-// Case-file noir palette. Dark, cinematic, dossier-forward.
+// Case-file noir — palette locked to the Agent FERPA Visual Bible
+// (wiki/abya/agent-ferpa-visual-bible.md, canonical 2026-06-30):
+//   navy base #003D6B · mid blue #005696 · cyan hero-light #9CEAFF ·
+//   amber resolution #FFB347–#E8A33D · BreachCorp acid green #7CFC4D · black redaction.
+// Rule: the world lives on the navy-to-cyan base; the hero side warms to amber;
+// the villain side corrupts toward acid green and black redaction bars.
 export default {
   darkMode: ['class'],
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // The vault: near-black blues the interface sits on.
+        // The vault: a dark navy ramp anchored to the #003D6B base.
         ink: {
-          DEFAULT: '#080b14',
-          800: '#0c1120',
-          700: '#111a30',
-          600: '#182742',
-          500: '#22354f',
+          DEFAULT: '#04101c', // page — near-black navy
+          800: '#06192b', // raised surface (dossier)
+          700: '#0a2440',
+          600: '#0f3253',
+          500: '#17466b', // borders — reads as the #003D6B navy edge
         },
-        // Clearance amber — stamps, seals, primary CTA.
+        // Navy anchors, straight from the bible.
+        navy: {
+          DEFAULT: '#003D6B',
+          mid: '#005696',
+        },
+        // Amber — resolution, golden hour, the hero's warmth. Primary CTA + stamps.
         amber: {
-          DEFAULT: '#f0a92b',
-          bright: '#ffc857',
-          dim: '#b47d1c',
+          DEFAULT: '#FFB347',
+          bright: '#FFC875',
+          dim: '#E8A33D',
         },
-        // Signal cyan — the "vetted / safe" accent for the directory.
+        // Cyan hero-light — the truth signal. The directory's "vetted" accent.
         signal: {
-          DEFAULT: '#3fb6c9',
-          bright: '#6fe3f2',
-          dim: '#2a7f8c',
+          DEFAULT: '#9CEAFF',
+          bright: '#C8F4FF',
+          dim: '#4FA9CE',
         },
-        // Redaction / danger — used sparingly (THE BROKER, gated stamps).
-        redact: '#c8493f',
-        paper: '#e8e4d8',
+        // BreachCorp corruption — villain/gated accent. Pairs with black redaction.
+        acid: '#7CFC4D',
+        // Pure black redaction bars.
+        redact: '#000000',
+        // Cool near-white for body copy on the navy base.
+        paper: '#e6f3fb',
       },
       fontFamily: {
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],
         sans: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
       },
       backgroundImage: {
-        'vault-gradient': 'radial-gradient(120% 100% at 50% 0%, #182742 0%, #0c1120 45%, #080b14 100%)',
+        'vault-gradient': 'radial-gradient(120% 100% at 50% 0%, #003D6B 0%, #06192b 45%, #04101c 100%)',
         'case-grain':
-          'repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px)',
+          'repeating-linear-gradient(0deg, rgba(156,234,255,0.02) 0px, rgba(156,234,255,0.02) 1px, transparent 1px, transparent 3px)',
       },
       boxShadow: {
-        dossier: '0 24px 60px -20px rgba(0,0,0,0.7)',
+        dossier: '0 24px 60px -20px rgba(0,0,0,0.75)',
         stamp: '0 0 0 2px currentColor inset',
       },
       keyframes: {

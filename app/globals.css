@@ -12,7 +12,6 @@ html {
 
 body {
   @apply bg-ink text-paper font-sans antialiased;
-  background-image: var(--tw-bg-vault, none);
 }
 
 /* Case-file noir helpers ---------------------------------------------------- */
@@ -27,9 +26,9 @@ body {
   @apply bg-ink-800/80 border border-ink-500/60 rounded-md backdrop-blur-sm;
 }
 
-/* Redaction bar — for THE BROKER and gated marks. */
+/* Redaction mark — black bar with acid-green BreachCorp signal (villain space). */
 .redacted {
-  @apply bg-redact/90 text-ink font-mono uppercase tracking-widest;
+  @apply bg-acid px-1 font-mono uppercase tracking-widest text-ink;
 }
 
 /* Mono label */
@@ -37,14 +36,20 @@ body {
   @apply font-mono uppercase tracking-[0.25em] text-[0.7rem];
 }
 
-/* Grain overlay for cinematic texture. */
+/* Grain overlay for cinematic texture (scanline weave over a surface). */
 .grain::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: var(--grain);
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(156, 234, 255, 0.02) 0px,
+    rgba(156, 234, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 /* Custom scrollbar for the noir feel. */

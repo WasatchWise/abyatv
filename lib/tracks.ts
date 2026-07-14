@@ -110,6 +110,13 @@ export type GatedEpisode = {
   track: string;
   /** Short, honest teaser. No fabricated plot. */
   teaser: string;
+  /**
+   * Canonical League of Gaps art (silhouette-only on the card). Only rogues
+   * named in the master-script rogue-visuals are used: THE TRACKER (Series 1)
+   * and THE BROKER (the Ep-F2 rogue). No invented villains.
+   */
+  art: string;
+  artAlt: string;
 };
 
 export const GATED_EPISODES: GatedEpisode[] = [
@@ -118,12 +125,16 @@ export const GATED_EPISODES: GatedEpisode[] = [
     title: 'Case File F1',
     track: 'FERPA Fundamentals',
     teaser: 'The first declassified case. Watch it inside the Agency.',
+    art: '/villains/tracker.webp',
+    artAlt: '',
   },
   {
     code: 'EP-F2',
     title: 'Case File F2',
     track: 'FERPA Fundamentals',
     teaser: 'A silhouette moves through the record room. Watch it inside the Agency.',
+    art: '/villains/broker.webp',
+    artAlt: '',
   },
 ];
 

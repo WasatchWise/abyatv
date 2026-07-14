@@ -2,7 +2,7 @@ import { PlayCircle } from 'lucide-react';
 import { HeroSearch } from '@/components/HeroSearch';
 
 const HUB_VIDEO_URL =
-  process.env.NEXT_PUBLIC_HUB_VIDEO_URL ??
+  process.env.NEXT_PUBLIC_HUB_VIDEO_URL ||
   'https://media.askbeforeyouapp.com/hub-intro-five-pillars-v4.mp4';
 
 /**

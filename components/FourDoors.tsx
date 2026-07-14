@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { GraduationCap, ShieldAlert, Landmark, Users } from 'lucide-react';
 
-const AGENCY_URL = process.env.NEXT_PUBLIC_AGENCY_URL ?? 'https://askbeforeyouapp.com';
+const AGENCY_URL = process.env.NEXT_PUBLIC_AGENCY_URL || 'https://askbeforeyouapp.com';
 
 /**
  * The four doors — each entry point asks the visitor's own question.

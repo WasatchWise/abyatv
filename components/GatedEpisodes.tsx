@@ -1,7 +1,7 @@
 import { GATED_EPISODES } from '@/lib/tracks';
 import { ArrowUpRight } from 'lucide-react';
 
-const AGENCY_URL = process.env.NEXT_PUBLIC_AGENCY_URL ?? 'https://askbeforeyouapp.com';
+const AGENCY_URL = process.env.NEXT_PUBLIC_AGENCY_URL || 'https://askbeforeyouapp.com';
 
 /**
  * Gated episodes render as CARDS, NOT players. Every click navigates to the

@@ -38,3 +38,4 @@ yarn-error.log*
 # Superseded pre-zero-PII plan (Agency Portal + Studio Cockpit). Kept on
 # disk for reference, out of git so it never reads as current canon.
 /docs/
+.env*

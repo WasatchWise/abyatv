@@ -1,11 +1,14 @@
-import { ExternalLink, Youtube } from 'lucide-react';
+import Link from 'next/link';
+import { ExternalLink, Youtube, FileText } from 'lucide-react';
 import { ageBandLabel, formatDuration, normalizeCategory, type Video } from '@/lib/videos';
 
 /**
- * A directory entry. The `parent_abstract` is the point — it is shown
- * prominently so a parent or teacher knows what is in the video before pressing
- * play. The source link opens the video on its own platform; abya.tv never
- * hosts or embeds it.
+ * A directory entry. The `parent_abstract` is the point — shown prominently so
+ * a parent or teacher knows what is in the video before pressing play.
+ *
+ * The whole card links to the review page (/video/[id]) — that clean URL is the
+ * thing people bookmark and paste into staff emails and parent texts. The
+ * "Watch on YouTube" link is a secondary action that opens the source directly.
  */
 export function VideoCard({ video }: { video: Video }) {
   const duration = formatDuration(video.duration_seconds);
@@ -16,42 +19,48 @@ export function VideoCard({ video }: { video: Video }) {
 
   return (
     <article className="dossier group flex flex-col overflow-hidden transition hover:border-signal/50">
-      <div className="relative aspect-video w-full overflow-hidden bg-ink">
-        {video.thumbnail_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={video.thumbnail_url}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-ink-500">
-            <Youtube size={32} />
-          </div>
-        )}
-        {duration && (
-          <span className="absolute bottom-1.5 right-1.5 rounded bg-ink/90 px-1.5 py-0.5 font-mono text-[0.65rem] text-paper/80">
-            {duration}
+      <Link href={`/video/${video.id}`} className="block" aria-label={`Review: ${video.title}`}>
+        <div className="relative aspect-video w-full overflow-hidden bg-ink">
+          {video.thumbnail_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={video.thumbnail_url}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-ink-500">
+              <Youtube size={32} />
+            </div>
+          )}
+          {duration && (
+            <span className="absolute bottom-1.5 right-1.5 rounded bg-ink/90 px-1.5 py-0.5 font-mono text-[0.65rem] text-paper/80">
+              {duration}
+            </span>
+          )}
+          <span className="absolute left-1.5 top-1.5 rounded bg-signal/90 px-1.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-wider text-ink">
+            {ageBandLabel(video.score_age_band)}
           </span>
-        )}
-        <span className="absolute left-1.5 top-1.5 rounded bg-signal/90 px-1.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-wider text-ink">
-          {ageBandLabel(video.score_age_band)}
-        </span>
-      </div>
+        </div>
+      </Link>
 
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-2 font-bold leading-snug text-paper">{video.title}</h3>
+        <Link href={`/video/${video.id}`} className="block">
+          <h3 className="line-clamp-2 font-bold leading-snug text-paper transition group-hover:text-signal">
+            {video.title}
+          </h3>
 
-        {/* The product: the plain-language brief. */}
-        {video.parent_abstract && (
-          <div className="mt-3 border-l-2 border-signal/50 pl-3">
-            <p className="label text-signal/80">The brief</p>
-            <p className="mt-1 line-clamp-4 text-sm leading-relaxed text-paper/70">
-              {video.parent_abstract}
-            </p>
-          </div>
-        )}
+          {/* The product: the plain-language brief. */}
+          {video.parent_abstract && (
+            <div className="mt-3 border-l-2 border-signal/50 pl-3">
+              <p className="label text-signal/80">The brief</p>
+              <p className="mt-1 line-clamp-4 text-sm leading-relaxed text-paper/70">
+                {video.parent_abstract}
+              </p>
+            </div>
+          )}
+        </Link>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {cats.map((c) => (
@@ -64,15 +73,23 @@ export function VideoCard({ video }: { video: Video }) {
           ))}
         </div>
 
-        <a
-          href={video.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center justify-center gap-2 rounded-sm border border-ink-500 py-2 font-mono text-xs uppercase tracking-widest text-paper/80 transition hover:border-signal hover:text-signal"
-        >
-          Watch on {video.platform === 'youtube' ? 'YouTube' : video.platform}
-          <ExternalLink size={13} />
-        </a>
+        <div className="mt-4 flex items-center gap-2">
+          <Link
+            href={`/video/${video.id}`}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-sm border border-ink-500 py-2 font-mono text-xs uppercase tracking-widest text-paper/80 transition hover:border-signal hover:text-signal"
+          >
+            <FileText size={13} /> Read the brief
+          </Link>
+          <a
+            href={video.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Watch on the original platform"
+            className="inline-flex items-center justify-center gap-1 rounded-sm border border-ink-500 px-3 py-2 font-mono text-xs uppercase tracking-widest text-paper/60 transition hover:border-amber hover:text-amber"
+          >
+            <ExternalLink size={13} />
+          </a>
+        </div>
       </div>
     </article>
   );

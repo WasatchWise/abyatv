@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { fetchVideos, topCategories } from '@/lib/videos';
 import { DirectoryClient } from '@/components/DirectoryClient';
+import { TrustBadge } from '@/components/TrustBadge';
 
 export const metadata: Metadata = {
   title: 'The Directory',
@@ -17,17 +18,23 @@ export default async function DirectoryPage() {
   const categories = topCategories(videos);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
-        <span className="stamp">Ask Before You Play</span>
-        <h1 className="mt-4 font-mono text-3xl font-bold tracking-tight text-paper sm:text-4xl">
-          The Directory
-        </h1>
-        <p className="mt-3 max-w-2xl text-paper/60">
-          {videos.length} vetted videos, each with a straight read on what is
-          actually in it. Filter by age and category, or search the briefs. The
-          links open on the original platform. We never host the video, and we
-          never ask who you are.
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <header className="mb-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <span className="stamp">Ask Before You Play</span>
+            <h1 className="mt-3 font-mono text-2xl font-bold tracking-tight text-paper sm:text-3xl">
+              Is this video okay?
+            </h1>
+          </div>
+          <p className="font-mono text-xs uppercase tracking-widest text-paper/45">
+            {videos.length} vetted reviews
+          </p>
+        </div>
+        <p className="mt-2 max-w-2xl text-sm text-paper/60">
+          Paste the link you were handed, or search the title. You get the brief,
+          the age band, and the score in seconds. Bookmark anything and come back
+          any time. No account, ever.
         </p>
       </header>
 
@@ -43,6 +50,10 @@ export default async function DirectoryPage() {
       ) : (
         <DirectoryClient videos={videos} categories={categories} />
       )}
+
+      <div className="mt-16">
+        <TrustBadge />
+      </div>
     </div>
   );
 }

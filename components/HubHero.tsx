@@ -1,4 +1,5 @@
 import { PlayCircle } from 'lucide-react';
+import { HeroSearch } from '@/components/HeroSearch';
 
 const HUB_VIDEO_URL =
   process.env.NEXT_PUBLIC_HUB_VIDEO_URL ??
@@ -26,12 +27,15 @@ export function HubHero() {
               knows before pressing play. Free, public, and anonymous. There is
               no account here, and there never will be.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            {/* Search-first: the fastest path to a verdict is right here. */}
+            <HeroSearch />
+
+            <div className="mt-5 flex flex-wrap items-center gap-4">
               <a
                 href="/directory"
-                className="inline-flex items-center gap-2 rounded-sm bg-amber px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-ink transition hover:bg-amber-bright"
+                className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-6 py-3 font-mono text-sm uppercase tracking-widest text-paper/80 transition hover:border-amber hover:text-amber"
               >
-                Open the Directory
+                Browse the Directory
               </a>
               <a
                 href="#tracks"

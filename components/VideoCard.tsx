@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ExternalLink, Youtube, FileText } from 'lucide-react';
-import { ageBandLabel, formatDuration, normalizeCategory, type Video } from '@/lib/videos';
+import { ExternalLink, FileText } from 'lucide-react';
+import { ageBandLabel, formatDuration, normalizeCategory, thumbUrl, type Video } from '@/lib/videos';
 
 /**
  * A directory entry. The `parent_abstract` is the point — shown prominently so
@@ -21,19 +21,15 @@ export function VideoCard({ video }: { video: Video }) {
     <article className="dossier group flex flex-col overflow-hidden transition hover:border-signal/50">
       <Link href={`/video/${video.id}`} className="block" aria-label={`Review: ${video.title}`}>
         <div className="relative aspect-video w-full overflow-hidden bg-ink">
-          {video.thumbnail_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={video.thumbnail_url}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-ink-500">
-              <Youtube size={32} />
-            </div>
-          )}
+          {/* First-party proxy — the browser never contacts Google. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={thumbUrl(video.platform_video_id)}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
+          />
           {duration && (
             <span className="absolute bottom-1.5 right-1.5 rounded bg-ink/90 px-1.5 py-0.5 font-mono text-[0.65rem] text-paper/80">
               {duration}

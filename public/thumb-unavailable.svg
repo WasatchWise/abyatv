@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270">
+  <rect width="480" height="270" fill="#04101c"/>
+  <rect x="8" y="8" width="464" height="254" fill="none" stroke="#17466b" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="240" y="132" text-anchor="middle" fill="#4FA9CE" font-family="ui-monospace, monospace" font-size="16" letter-spacing="4">NO STILL ON FILE</text>
+  <text x="240" y="158" text-anchor="middle" fill="#17466b" font-family="ui-monospace, monospace" font-size="11" letter-spacing="2">NO SOURCE ID</text>
+</svg>

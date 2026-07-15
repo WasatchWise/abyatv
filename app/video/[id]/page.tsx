@@ -11,6 +11,8 @@ import {
   normalizeCategory,
   scoreColor,
   flagLabel,
+  thumbUrl,
+  thumbUrlAbsolute,
   SCORE_ROWS,
   type VideoDetail,
 } from '@/lib/videos';
@@ -38,6 +40,9 @@ export async function generateMetadata({
   const video = await fetchVideoById(id);
   if (!video) return { title: 'Review not found' };
   const desc = video.parent_abstract ?? 'A plain-language review of what is in this video.';
+  // og:image points at our own proxy, so unfurlers (Slack/iMessage) fetch the
+  // still from abya.tv rather than being pointed at Google.
+  const image = thumbUrlAbsolute(video.platform_video_id);
   return {
     title: `${video.title} · the brief`,
     description: desc,
@@ -46,13 +51,13 @@ export async function generateMetadata({
       description: desc,
       url: `https://abya.tv/video/${id}`,
       type: 'article',
-      images: video.thumbnail_url ? [{ url: video.thumbnail_url }] : undefined,
+      images: [{ url: image }],
     },
     twitter: {
       card: 'summary_large_image',
       title: video.title,
       description: desc,
-      images: video.thumbnail_url ? [video.thumbnail_url] : undefined,
+      images: [image],
     },
   };
 }
@@ -125,18 +130,18 @@ export default async function VideoReviewPage({
           {/* The verdict, up top — watch it here + the brief. */}
           <div className="dossier mt-6 overflow-hidden">
             {video.platform === 'youtube' && video.platform_video_id ? (
-              <YouTubeEmbed
-                videoId={video.platform_video_id}
-                title={video.title}
-                poster={video.thumbnail_url}
-              />
+              <YouTubeEmbed videoId={video.platform_video_id} title={video.title} />
             ) : (
-              video.thumbnail_url && (
-                <div className="relative aspect-video w-full overflow-hidden bg-ink">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={video.thumbnail_url} alt="" className="h-full w-full object-cover" />
-                </div>
-              )
+              <div className="relative aspect-video w-full overflow-hidden bg-ink">
+                {/* First-party proxy — the browser never contacts Google. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumbUrl(video.platform_video_id)}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="h-full w-full object-cover"
+                />
+              </div>
             )}
             <div className="p-5">
               <div className="flex items-center gap-2">

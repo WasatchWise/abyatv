@@ -13,9 +13,16 @@ export type Video = {
   title: string;
   source_url: string;
   platform: string;
-  /** YouTube/TikTok video id — lets us resolve a pasted URL to a review page. */
+  /**
+   * YouTube/TikTok video id. Resolves a pasted URL to a review page, AND is
+   * what we build the first-party thumbnail proxy path from.
+   *
+   * NOTE: `thumbnail_url` is deliberately NOT selected. It holds a raw
+   * i.ytimg.com URL, and selecting it would serialize 314 Google URLs into the
+   * page payload — visible to anyone grepping the HTML and, worse, a hotlink
+   * waiting to happen. Thumbnails go through /api/thumb/<id> instead.
+   */
   platform_video_id: string | null;
-  thumbnail_url: string | null;
   duration_seconds: number | null;
   age_min: number | null;
   parent_abstract: string | null;
@@ -44,7 +51,7 @@ export type VideoDetail = Video & {
 };
 
 const SELECT =
-  'id,title,source_url,platform,platform_video_id,thumbnail_url,duration_seconds,age_min,parent_abstract,category_tags,topic_tags,score_composite,score_age_band';
+  'id,title,source_url,platform,platform_video_id,duration_seconds,age_min,parent_abstract,category_tags,topic_tags,score_composite,score_age_band';
 
 const DETAIL_SELECT =
   SELECT +
@@ -177,6 +184,20 @@ export function topCategories(videos: Video[], limit = 14): string[] {
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([label]) => label);
+}
+
+/**
+ * First-party thumbnail path. The browser only ever talks to abya.tv; the
+ * proxy fetches from ytimg server-side. Never build an i.ytimg.com URL in
+ * client-rendered code — that is the leak this exists to close.
+ */
+export function thumbUrl(platformVideoId: string | null): string {
+  return platformVideoId ? `/api/thumb/${platformVideoId}` : '/thumb-unavailable.svg';
+}
+
+/** Absolute form, for og:image (unfurlers fetch it from us, not from Google). */
+export function thumbUrlAbsolute(platformVideoId: string | null): string {
+  return `https://abya.tv${thumbUrl(platformVideoId)}`;
 }
 
 export function formatDuration(seconds: number | null): string {

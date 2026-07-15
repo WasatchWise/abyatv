@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Play, RotateCcw, ArrowRight } from 'lucide-react';
+import { thumbUrl } from '@/lib/videos';
 
 /* Minimal YT IFrame API surface we use. */
 type YTPlayer = {
@@ -64,7 +65,10 @@ export function YouTubeEmbed({
   const [ended, setEnded] = useState(false);
   const mountRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
-  const thumb = poster || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  // First-party proxy only. NEVER build an i.ytimg.com URL here: this poster
+  // renders before the visitor has pressed play, which is precisely the moment
+  // the "nothing loads from YouTube until you do" promise has to be true.
+  const thumb = poster || thumbUrl(videoId);
 
   useEffect(() => {
     if (!playing || !mountRef.current) return;
@@ -136,6 +140,7 @@ export function YouTubeEmbed({
         <img
           src={thumb}
           alt=""
+          referrerPolicy="no-referrer"
           className="h-full w-full object-cover opacity-80 transition duration-300 group-hover:opacity-100"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-ink/30 transition group-hover:bg-ink/20">

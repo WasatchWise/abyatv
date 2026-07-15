@@ -9,14 +9,9 @@ const nextConfig = {
   outputFileTracingRoot: __dirname,
   reactStrictMode: true,
   transpilePackages: ['lucide-react'],
-  images: {
-    // Read-only: we only ever render remote thumbnails, never upload.
-    remotePatterns: [
-      { protocol: 'https', hostname: 'i.ytimg.com' },
-      { protocol: 'https', hostname: 'img.youtube.com' },
-      { protocol: 'https', hostname: '*.ytimg.com' },
-    ],
-  },
+  // No remote image hosts, on purpose. Every thumbnail is served first-party
+  // through /api/thumb/<id>, so the visitor's browser never contacts Google.
+  // Do not add ytimg back here — that would re-open the hotlink path.
   typescript: { ignoreBuildErrors: false },
   eslint: { ignoreDuringBuilds: false },
 };

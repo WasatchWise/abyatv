@@ -1,7 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { PwaRegister } from '@/components/PwaRegister';
+import { InstallPrompt } from '@/components/InstallPrompt';
+
+export const viewport: Viewport = {
+  themeColor: '#04101c',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://abya.tv'),
@@ -20,6 +26,11 @@ export const metadata: Metadata = {
     type: 'website',
   },
   robots: { index: true, follow: true },
+  appleWebApp: {
+    capable: true,
+    title: 'abya.tv',
+    statusBarStyle: 'black-translucent',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -29,6 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />
+        <PwaRegister />
+        <InstallPrompt />
       </body>
     </html>
   );

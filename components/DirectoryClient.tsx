@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Search, X, Link2, ArrowRight } from 'lucide-react';
+import { Search, X, Link2, ArrowRight, Bookmark, Send, Download } from 'lucide-react';
 import { VideoCard } from '@/components/VideoCard';
 import {
   AGE_BANDS,
@@ -11,16 +11,25 @@ import {
   normalizeCategory,
   type Video,
 } from '@/lib/videos';
+import {
+  addBookmarks,
+  bookmarksFromFragment,
+  bookmarksToJsonBlob,
+  bookmarksToShareUrl,
+  getBookmarkIds,
+  onBookmarksChanged,
+} from '@/lib/bookmarks';
 
 /**
  * Search-first directory. Two modes, both first-class:
  *   1. "Is THIS one okay?" — paste a YouTube/TikTok URL, jump to its review.
  *   2. "What's good?" — search text + filter by age/category and browse.
  *
- * ZERO-PII: all state is anonymous UI state in React memory, mirrored into the
- * URL query string so a search or filtered view is itself bookmarkable and
- * shareable. The URL is the memory — nothing is written to localStorage,
- * cookies, or any store, and no query is ever tied to an identity.
+ * ZERO-PII: search and filter state is anonymous UI state in React memory,
+ * mirrored into the URL query string so a search or filtered view is itself
+ * bookmarkable and shareable. No query is ever tied to an identity (none
+ * exists). Saved files are the one deliberate device-local exception —
+ * IndexedDB, never sent to the server; see lib/bookmarks.ts and the README.
  */
 export function DirectoryClient({
   videos,
@@ -32,6 +41,10 @@ export function DirectoryClient({
   const [query, setQuery] = useState('');
   const [ageBand, setAgeBand] = useState('all');
   const [category, setCategory] = useState('all');
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [pendingImport, setPendingImport] = useState<string[] | null>(null);
+  const [transferNote, setTransferNote] = useState('');
   const [limit, setLimit] = useState(48);
   const [hydrated, setHydrated] = useState(false);
 
@@ -46,7 +59,31 @@ export function DirectoryClient({
     if (q) setQuery(q);
     if (age) setAgeBand(age);
     if (cat) setCategory(cat);
+    if (p.get('saved') === '1') setSavedOnly(true);
+    // Capture a #b=… transfer fragment BEFORE the URL mirror below wipes the
+    // hash. The fragment never reached the server; it dies here on-device.
+    const hash = window.location.hash;
+    if (hash) {
+      bookmarksFromFragment(hash).then((ids) => {
+        if (ids && ids.length > 0) setPendingImport(ids);
+      });
+    }
     setHydrated(true);
+  }, []);
+
+  // Device-local saved set, kept in sync across components.
+  useEffect(() => {
+    let alive = true;
+    const refresh = () =>
+      getBookmarkIds().then((ids) => {
+        if (alive) setSavedIds(new Set(ids));
+      });
+    refresh();
+    const off = onBookmarksChanged(refresh);
+    return () => {
+      alive = false;
+      off();
+    };
   }, []);
 
   // Mirror the current view into the URL (anonymous, shareable, bookmarkable).
@@ -56,9 +93,10 @@ export function DirectoryClient({
     if (query.trim()) p.set('q', query.trim());
     if (ageBand !== 'all') p.set('age', ageBand);
     if (category !== 'all') p.set('cat', category);
+    if (savedOnly) p.set('saved', '1');
     const qs = p.toString();
     window.history.replaceState(null, '', qs ? `/directory?${qs}` : '/directory');
-  }, [query, ageBand, category, hydrated]);
+  }, [query, ageBand, category, savedOnly, hydrated]);
 
   // URL-paste mode: if the box holds a video URL, try to resolve it in-directory.
   const urlMatch = useMemo(() => {
@@ -74,6 +112,7 @@ export function DirectoryClient({
     if (urlMatch) return [];
     const q = query.trim().toLowerCase();
     return videos.filter((v) => {
+      if (savedOnly && !savedIds.has(v.id)) return false;
       if (ageBand !== 'all' && v.score_age_band !== ageBand) return false;
       if (category !== 'all') {
         const cats = (v.category_tags ?? []).map(normalizeCategory);
@@ -92,10 +131,40 @@ export function DirectoryClient({
       }
       return true;
     });
-  }, [videos, query, ageBand, category, urlMatch]);
+  }, [videos, query, ageBand, category, urlMatch, savedOnly, savedIds]);
 
   const shown = filtered.slice(0, limit);
-  const hasFilters = query || ageBand !== 'all' || category !== 'all';
+  const hasFilters = query || ageBand !== 'all' || category !== 'all' || savedOnly;
+
+  const sendSavedToDevice = async () => {
+    const url = await bookmarksToShareUrl();
+    if (!url) return;
+    // The bookmark set rides in the #fragment — never sent to any server.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My saved abya.tv reviews', url });
+        return;
+      } catch {
+        /* fall through to clipboard on cancel/unsupported payload */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setTransferNote('Link copied. Open it on your other device.');
+    } catch {
+      setTransferNote(url); // last resort: show it for manual copy
+    }
+    setTimeout(() => setTransferNote(''), 6000);
+  };
+
+  const exportSaved = async () => {
+    const blob = await bookmarksToJsonBlob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'abya-saved-reviews.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
   return (
     <div>
@@ -156,6 +225,19 @@ export function DirectoryClient({
                 </option>
               ))}
             </select>
+
+            <button
+              onClick={() => setSavedOnly((v) => !v)}
+              aria-pressed={savedOnly}
+              title="Reviews you saved on this device"
+              className={`inline-flex items-center gap-2 rounded-sm border px-3 py-3 font-mono text-xs uppercase tracking-wider transition focus:outline-none ${
+                savedOnly
+                  ? 'border-signal bg-signal/10 text-signal'
+                  : 'border-ink-500 bg-ink text-paper hover:border-signal/60'
+              }`}
+            >
+              <Bookmark size={13} /> Saved{savedIds.size > 0 ? ` (${savedIds.size})` : ''}
+            </button>
           </div>
         </div>
 
@@ -171,6 +253,7 @@ export function DirectoryClient({
                   setQuery('');
                   setAgeBand('all');
                   setCategory('all');
+                  setSavedOnly(false);
                 }}
                 className="font-mono text-xs uppercase tracking-widest text-amber hover:text-amber-bright"
               >
@@ -180,6 +263,61 @@ export function DirectoryClient({
           </div>
         )}
       </div>
+
+      {/* Transfer-import banner: a #b=… link opened from another device. */}
+      {pendingImport && (
+        <div className="dossier mt-6 border-signal/40 p-5">
+          <p className="font-mono text-xs uppercase tracking-widest text-signal">
+            Saved reviews received
+          </p>
+          <p className="mt-1 text-sm text-paper/65">
+            This link carries {pendingImport.length} saved{' '}
+            {pendingImport.length === 1 ? 'review' : 'reviews'} from another device. Add them to
+            this one? They stay on this device — nothing is sent to us.
+          </p>
+          <div className="mt-3 flex gap-3">
+            <button
+              onClick={async () => {
+                await addBookmarks(pendingImport);
+                setPendingImport(null);
+                setSavedOnly(true);
+              }}
+              className="rounded-sm border border-signal px-4 py-2 font-mono text-xs uppercase tracking-widest text-signal transition hover:bg-signal hover:text-ink"
+            >
+              Add {pendingImport.length}
+            </button>
+            <button
+              onClick={() => setPendingImport(null)}
+              className="rounded-sm border border-ink-500 px-4 py-2 font-mono text-xs uppercase tracking-widest text-paper/60 hover:text-paper"
+            >
+              Ignore
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Saved-view toolbar: move the set between devices, zero server knowledge. */}
+      {savedOnly && !urlMatch && savedIds.size > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            onClick={sendSavedToDevice}
+            className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-4 py-2 font-mono text-xs uppercase tracking-widest text-paper/70 transition hover:border-signal hover:text-signal"
+          >
+            <Send size={13} /> Send to another device
+          </button>
+          <button
+            onClick={exportSaved}
+            className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-4 py-2 font-mono text-xs uppercase tracking-widest text-paper/70 transition hover:border-signal hover:text-signal"
+          >
+            <Download size={13} /> Export file
+          </button>
+          {transferNote && (
+            <span className="break-all font-mono text-[0.65rem] uppercase tracking-widest text-signal/80">
+              {transferNote}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* URL-paste verdict banner. */}
       {urlMatch && (
@@ -236,6 +374,16 @@ export function DirectoryClient({
               </div>
             )}
           </>
+        ) : savedOnly && savedIds.size === 0 ? (
+          <div className="dossier mt-6 p-12 text-center">
+            <p className="font-mono text-sm uppercase tracking-widest text-paper/50">
+              Nothing saved on this device yet.
+            </p>
+            <p className="mt-2 text-sm text-paper/40">
+              Tap the bookmark on any review to keep it here. Saved files live on this device
+              only — no account, ever.
+            </p>
+          </div>
         ) : (
           <div className="dossier mt-6 p-12 text-center">
             <p className="font-mono text-sm uppercase tracking-widest text-paper/50">

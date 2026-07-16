@@ -19,6 +19,7 @@ import {
 import { VideoCard } from '@/components/VideoCard';
 import { TrustBadge } from '@/components/TrustBadge';
 import { YouTubeEmbed } from '@/components/YouTubeEmbed';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 // Static-render every review page for speed; re-check the vetted set hourly.
 export const revalidate = 3600;
@@ -151,15 +152,18 @@ export default async function VideoReviewPage({
                 {video.parent_abstract ?? 'No brief is available for this video yet.'}
               </p>
 
-              <a
-                href={video.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-sm border border-ink-500 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-paper/70 transition hover:border-amber hover:text-amber"
-              >
-                Open on {video.platform === 'youtube' ? 'YouTube' : video.platform}
-                <ExternalLink size={14} />
-              </a>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <a
+                  href={video.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-sm border border-ink-500 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-paper/70 transition hover:border-amber hover:text-amber"
+                >
+                  Open on {video.platform === 'youtube' ? 'YouTube' : video.platform}
+                  <ExternalLink size={14} />
+                </a>
+                <BookmarkButton videoId={video.id} label />
+              </div>
               <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-widest text-paper/35">
                 Streams from {video.platform === 'youtube' ? 'YouTube' : video.platform} · abya.tv never hosts the video
               </p>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ExternalLink, FileText } from 'lucide-react';
 import { ageBandLabel, formatDuration, normalizeCategory, thumbUrl, type Video } from '@/lib/videos';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 /**
  * A directory entry. The `parent_abstract` is the point — shown prominently so
@@ -76,6 +77,7 @@ export function VideoCard({ video }: { video: Video }) {
           >
             <FileText size={13} /> Read the brief
           </Link>
+          <BookmarkButton videoId={video.id} />
           <a
             href={video.source_url}
             target="_blank"

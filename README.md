@@ -19,12 +19,41 @@ This is not a policy that lives in a doc. It is enforced by the shape of the app
 - **No fingerprinting analytics.** No Google Analytics, no Meta pixel, no
   cookies, no device fingerprinting. Traffic counting, if ever added, must be
   cookieless and aggregate.
-- **No personal `localStorage`.** Directory search and filters are anonymous UI
-  state held in React memory only. Refresh resets everything, by design.
+- **No identity-bearing storage.** Directory search and filters are anonymous
+  UI state held in React memory, mirrored only into the URL. *Canon amended
+  2026-07-15 (John-approved):* the one deliberate exception is **saved
+  reviews** — device-local bookmarks in IndexedDB (`lib/bookmarks.ts`). They
+  are review ids only, never sent to the server, never attached to a request,
+  and there is no identity to tie them to. Transfer between devices happens
+  through a URL **fragment** (`#b=…`), which browsers never transmit to the
+  server, or a JSON file download. The rule this preserves: **the server can
+  never learn anything about a visitor from storage.** `localStorage` remains
+  off-limits; anything new that stores on-device must clear the same bar
+  (anonymous, local-only, exportable, never transmitted).
 
 Anything that needs identity (membership, payment, the weekly-briefing email
 address) happens on **askbeforeyouapp.com**, a separate production app. abya.tv
 links out to it; it never collects on its behalf.
+
+## PWA (added 2026-07-15)
+
+abya.tv is installable. The pieces, all zero-PII:
+
+- `app/manifest.ts` — manifest with `share_target`: once installed on
+  Android / desktop Chrome, abya.tv appears in the OS share sheet, so
+  Share → abya.tv from the YouTube app lands on the verdict. iOS has no
+  share_target (WebKit bug 194593); iPhone users get the paste box.
+- `app/share/route.ts` — stateless GET redirect: pulls the first video URL out
+  of the shared `url`/`text`/`title` params (YouTube shares in `text`) and
+  bounces to `/directory?q=…`, the existing paste-resolution path. Nothing is
+  stored or logged beyond a normal request.
+- `public/sw.js` — minimal service worker: installability + cache-first for
+  `/api/thumb/*` (same-origin only) + SWR for hashed static chunks. No page
+  caching, no push, no state. Served with `Cache-Control: no-cache` (see
+  `next.config.mjs`) so updates and kill-switches propagate immediately.
+- `components/InstallPrompt.tsx` — contextual install card, shown only after
+  the first saved review, dismissal respected for a month (stored in the same
+  device-local IndexedDB).
 
 ## Architecture
 
